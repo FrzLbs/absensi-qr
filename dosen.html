@@ -167,7 +167,22 @@
   </div>
 
   <button class="btn btn-danger logout-btn" onclick="logout()">🚪 Logout</button>
-
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCJwC685IGikpDCFnc6XPLrodGi4TqkOU",
+      authDomain: "absensi-qr-42757.firebaseapp.com",
+      databaseURL: "https://absensi-qr-42757-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "absensi-qr-42757",
+      storageBucket: "absensi-qr-42757.firebasestorage.app",
+      messagingSenderId: "914063064915",
+      appId: "1:914063064915:web:cbfc9f253fe38f1370eba6",
+      measurementId: "G-VCZT04XMHG"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
   <script>
     const dosen = JSON.parse(localStorage.getItem("dosenLogin"));
     if (!dosen) {
@@ -238,7 +253,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       generateQRCode();
-      loadAbsen();
+      tampilkanAbsensi();
     });
   </script>
   <script>
@@ -257,9 +272,11 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${index++}</td>
+            <td>${item.nim || '-'}</td>
             <td>${item.nama}</td>
-            <td>${tanggalHariIni}</td>
-            <td>${item.waktu || "-"}</td>
+            <td>${item.tanggal || tanggalHariIni}</td>
+            <td>${item.jam || item.waktu || '-'}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="hapusFirebaseAbsen('${item.nim}', '${tanggalHariIni}')">🗑️</button></td>
           `;
           tbody.appendChild(tr);
         });
@@ -270,7 +287,6 @@
       }
     });
   }
-
   tampilkanAbsensi();
   </script>
 </body>
