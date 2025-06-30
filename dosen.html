@@ -241,5 +241,37 @@
       loadAbsen();
     });
   </script>
+  <script>
+  const tanggalHariIni = new Date().toISOString().split("T")[0];
+
+  function tampilkanAbsensi() {
+    const ref = database.ref("absensi/" + tanggalHariIni);
+    const tbody = document.querySelector("#tabel-absen tbody");
+    tbody.innerHTML = "";
+
+    ref.on("value", snapshot => {
+      const data = snapshot.val();
+      let index = 1;
+      if (data) {
+        Object.values(data).forEach(item => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${index++}</td>
+            <td>${item.nama}</td>
+            <td>${tanggalHariIni}</td>
+            <td>${item.waktu || "-"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="4">Belum ada yang absen hari ini.</td>`;
+        tbody.appendChild(tr);
+      }
+    });
+  }
+
+  tampilkanAbsensi();
+  </script>
 </body>
 </html>
