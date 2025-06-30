@@ -95,6 +95,16 @@
       window.location.href = "login.html";
     }
 
+    function simpanAbsensi(mahasiswa, tanggal, jam) {
+      const ref = database.ref("absensi/" + tanggal);
+      ref.push({
+        nim: mahasiswa.nim,
+        nama: mahasiswa.nama,
+        tanggal: tanggal,
+        jam: jam
+      });
+    }
+
     const formNama = document.getElementById("form-nama");
     const readerElement = document.getElementById("reader");
     const hasil = document.getElementById("hasil");
@@ -119,17 +129,8 @@
           const jam = now.toTimeString().split(" ")[0];
 
           if (qrCodeMessage === today) {
-            const data = JSON.parse(localStorage.getItem("absensi")) || [];
-            const sudahAbsen = data.find(a => a.nim === mahasiswa.nim && a.tanggal === today);
-
-            if (sudahAbsen) {
-              tampilkanHasil("⚠️ Anda sudah absen hari ini.", "warning");
-              return;
-            }
-
-            data.push({ nim: mahasiswa.nim, nama: mahasiswa.nama, tanggal: today, jam: jam });
-            localStorage.setItem("absensi", JSON.stringify(data));
-            tampilkanHasil("✅ Absensi berhasil. Terima kasih!", "success");
+            simpanAbsensi(mahasiswa, today, jam);
+            tampilkanHasil("✅ Absensi berhasil. Terima kasih!", "success")
             html5QrCode.stop();
           } else {
             tampilkanHasil("❌ QR tidak valid untuk hari ini.", "danger");
@@ -147,5 +148,34 @@
       hasil.classList.remove("d-none");
     }
   </script>
+
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCJwC685IGikpDCFnc6XPLrodGi4TqkOU",
+    authDomain: "absensi-qr-42757.firebaseapp.com",
+    databaseURL: "https://absensi-qr-42757-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "absensi-qr-42757",
+    storageBucket: "absensi-qr-42757.firebasestorage.app",
+    messagingSenderId: "914063064915",
+    appId: "1:914063064915:web:cbfc9f253fe38f1370eba6",
+    measurementId: "G-VCZT04XMHG"
+  };
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  // Fungsi untuk menyimpan data ke Firebase
+  function simpanAbsensi(nama, tanggal) {
+    const ref = database.ref("absensi/" + tanggal);
+    ref.push({
+      nama: nama,
+      waktu: new Date().toLocaleTimeString()
+    });
+  }
+</script>
 </body>
 </html>
