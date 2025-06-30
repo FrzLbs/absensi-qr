@@ -168,14 +168,6 @@
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
-  // Fungsi untuk menyimpan data ke Firebase
-  function simpanAbsensi(nama, tanggal) {
-    const ref = database.ref("absensi/" + tanggal);
-    ref.push({
-      nama: nama,
-      waktu: new Date().toLocaleTimeString()
-    });
-  }
 </script>
 </body>
 </html>
