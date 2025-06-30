@@ -1,103 +1,173 @@
-<!-- ===================================== -->
-<!--              MAHASISWA.HTML         -->
-<!-- ===================================== -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Absensi Mahasiswa</title>
+  <title>Absensi Mahasiswa UINSU</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f2fef7, #ffffff);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    h1 {
+      font-weight: bold;
+      color: #007E3B;
+    }
+    .logo-uinsu { width: 80px; margin-bottom: 10px; }
+    .card-form {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+      max-width: 600px;
+      width: 100%;
+      border-top: 6px solid #007E3B;
+    }
+    label { font-weight: 500; color: #007E3B; }
+    .btn-primary { background-color: #007E3B; border: none; }
+    .btn-primary:hover { background-color: #006733; }
+    #reader {
+      width: 100%; max-width: 420px;
+      margin: 2rem auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 126, 59, 0.2);
+    }
+    #hasil {
+      font-weight: bold;
+      text-align: center;
+    }
+    .logout-btn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 999;
+    }
+  </style>
 </head>
 <body>
-  <div class="container py-4">
-    <h2 class="text-center mb-4">📷 Absensi Mahasiswa</h2>
 
+  <img src="uinsu.png" alt="Logo UINSU" class="logo-uinsu" />
+  <h1 class="text-center mb-4">📷 Absensi Mahasiswa UINSU</h1>
+
+  <div class="card-form mb-4">
     <form id="form-nama">
-      <div class="mb-3">
-        <label>NIM</label>
-        <input type="text" class="form-control" id="nim" readonly />
+      <div class="row mb-3">
+        <div class="col-md-6 mb-3">
+          <label for="nim" class="form-label">📌 NIM</label>
+          <input type="text" class="form-control" id="nim" required readonly />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="nama" class="form-label">👤 Nama Lengkap</label>
+          <input type="text" class="form-control" id="nama" required readonly />
+        </div>
       </div>
-      <div class="mb-3">
-        <label>Nama</label>
-        <input type="text" class="form-control" id="nama" readonly />
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">📡 Aktifkan Kamera & Scan</button>
       </div>
-      <button type="submit" class="btn btn-primary">Aktifkan Kamera & Scan</button>
     </form>
-
-    <div id="reader" class="mt-4 d-none"></div>
-    <div id="hasil" class="alert d-none mt-3"></div>
   </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCJwC685IGikpDCFnc6XPLrodGi4TqkOU",
-      authDomain: "absensi-qr-42757.firebaseapp.com",
-      databaseURL: "https://absensi-qr-42757-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "absensi-qr-42757",
-      storageBucket: "absensi-qr-42757.appspot.com",
-      messagingSenderId: "914063064915",
-      appId: "1:914063064915:web:cbfc9f253fe38f1370eba6"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+  <div id="reader" class="d-none"></div>
+  <div id="hasil" class="alert d-none"></div>
 
+  <button class="btn btn-danger logout-btn" onclick="logout()">🚪 Logout</button>
+
+  <script>
     const mahasiswa = JSON.parse(localStorage.getItem("mahasiswaLogin"));
     if (!mahasiswa) {
       window.location.href = "login.html";
     }
+
     document.getElementById("nama").value = mahasiswa.nama;
     document.getElementById("nim").value = mahasiswa.nim;
 
-    function tampilkanHasil(pesan, tipe) {
-      const hasil = document.getElementById("hasil");
-      hasil.textContent = pesan;
-      hasil.className = `alert alert-${tipe}`;
-      hasil.classList.remove("d-none");
+    function logout() {
+      localStorage.removeItem("mahasiswaLogin");
+      window.location.href = "login.html";
     }
 
     function simpanAbsensi(mahasiswa, tanggal, jam) {
       const ref = database.ref("absensi/" + tanggal);
-      ref.once("value", snapshot => {
-        const data = snapshot.val();
-        const sudahAbsen = data && Object.values(data).some(item => item.nim === mahasiswa.nim);
-
-        if (sudahAbsen) {
-          tampilkanHasil("⚠️ Anda sudah absen hari ini.", "warning");
-        } else {
-          ref.push({ nim: mahasiswa.nim, nama: mahasiswa.nama, tanggal: tanggal, jam: jam });
-          tampilkanHasil("✅ Absensi berhasil. Terima kasih!", "success");
-        }
+      ref.push({
+        nim: mahasiswa.nim,
+        nama: mahasiswa.nama,
+        tanggal: tanggal,
+        jam: jam
       });
     }
 
-    document.getElementById("form-nama").addEventListener("submit", e => {
-      e.preventDefault();
-      document.getElementById("form-nama").classList.add("d-none");
-      document.getElementById("reader").classList.remove("d-none");
+    const formNama = document.getElementById("form-nama");
+    const readerElement = document.getElementById("reader");
+    const hasil = document.getElementById("hasil");
 
+    formNama.addEventListener("submit", function(e) {
+      e.preventDefault();
+      formNama.classList.add("d-none");
+      readerElement.classList.remove("d-none");
+      mulaiScan();
+    });
+
+    function mulaiScan() {
       const html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: 250 };
+
       html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
+        config,
         qrCodeMessage => {
           const today = new Date().toISOString().split("T")[0];
-          const jam = new Date().toTimeString().split(" ")[0];
+          const now = new Date();
+          const jam = now.toTimeString().split(" ")[0];
 
           if (qrCodeMessage === today) {
             simpanAbsensi(mahasiswa, today, jam);
+            tampilkanHasil("✅ Absensi berhasil. Terima kasih!", "success")
             html5QrCode.stop();
           } else {
             tampilkanHasil("❌ QR tidak valid untuk hari ini.", "danger");
           }
         },
-        err => {}
-      ).catch(err => tampilkanHasil("Gagal mengakses kamera", "danger"));
-    });
+        error => {}
+      ).catch(() => {
+        tampilkanHasil("❌ Gagal mengakses kamera.", "danger");
+      });
+    }
+
+    function tampilkanHasil(pesan, jenis) {
+      hasil.textContent = pesan;
+      hasil.className = "alert alert-" + jenis + " mt-3";
+      hasil.classList.remove("d-none");
+    }
   </script>
+
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCJwC685IGikpDCFnc6XPLrodGi4TqkOU",
+    authDomain: "absensi-qr-42757.firebaseapp.com",
+    databaseURL: "https://absensi-qr-42757-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "absensi-qr-42757",
+    storageBucket: "absensi-qr-42757.firebasestorage.app",
+    messagingSenderId: "914063064915",
+    appId: "1:914063064915:web:cbfc9f253fe38f1370eba6",
+    measurementId: "G-VCZT04XMHG"
+  };
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+</script>
 </body>
 </html>
