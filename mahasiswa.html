@@ -97,11 +97,20 @@
 
     function simpanAbsensi(mahasiswa, tanggal, jam) {
       const ref = database.ref("absensi/" + tanggal);
-      ref.push({
-        nim: mahasiswa.nim,
-        nama: mahasiswa.nama,
-        tanggal: tanggal,
-        jam: jam
+      ref.once("value", snapshot => {
+        const data = snapshot.val();
+        const sudahAbsen = data && Object.values(data).some(item => item.nim === mahasiswa.nim);
+        if (sudahAbsen) {
+          tampilkanHasil("⚠️ Anda sudah absen hari ini.", "warning");
+        } else {
+          ref.push({
+            nim: mahasiswa.nim,
+            nama: mahasiswa.nama,
+            tanggal: tanggal,
+            jam: jam
+          });
+          tampilkanHasil("✅ Absensi berhasil. Terima kasih!", "success");
+        }
       });
     }
 
