@@ -210,7 +210,7 @@
 
     function loadAbsen() {
       const tbody = document.querySelector('#tabel-absen tbody');
-      tbody.innerHTML = '';
+      tbody.innerHTML = "";
       const data = JSON.parse(localStorage.getItem('absensi')) || [];
       data.forEach((item, index) => {
         const tr = document.createElement('tr');
@@ -287,7 +287,6 @@
       }
     });
   }
-  tampilkanAbsensi();
   </script>
 </body>
 </html>
