@@ -7,187 +7,70 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    :root {
-      --uinsu-green: #006633;
-      --uinsu-gold: #f9b233;
-    }
-
     body {
-      background: linear-gradient(to bottom right, #f1fff1, #ffffff);
+      background: #f8fff8;
       font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      position: relative;
-      animation: fadeInBody 1.2s ease;
-    }
-
-    @keyframes fadeInBody {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #bg-logo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      opacity: 0.04;
-      width: 70%;
-      max-width: 500px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .container-panel {
-      position: relative;
-      z-index: 1;
-      max-width: 960px;
-      margin: auto;
-    }
-
-    .header-panel {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .header-panel h1 {
-      color: var(--uinsu-green);
-      font-weight: bold;
-    }
-
-    .badge-fst {
-      background-color: var(--uinsu-gold);
-      color: #000;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      display: inline-block;
-      margin-top: 0.5rem;
-    }
-
-    .card-qr {
-      background: #fff;
-      border-left: 8px solid var(--uinsu-green);
-      border-radius: 1rem;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       padding: 2rem;
-      text-align: center;
     }
-
-    .btn {
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-
-    .btn-primary {
-      background-color: var(--uinsu-green);
-      border: none;
-    }
-
-    .btn-primary:hover {
-      background-color: #004d26;
-    }
-
-    .btn-success {
-      background-color: var(--uinsu-gold);
-      border: none;
-      color: black;
-    }
-
-    .btn-success:hover {
-      background-color: #e6a500;
-      color: black;
-    }
-
-    table th {
-      background-color: var(--uinsu-green);
-      color: white;
-    }
-
-    table td, table th {
-      vertical-align: middle;
-    }
-
-    .footer {
-      margin-top: 3rem;
-      text-align: center;
-      color: #555;
-      font-size: 0.9rem;
-    }
-
-    .logout-btn {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      z-index: 1000;
-    }
+    h1 { color: #006633; font-weight: bold; }
+    .btn-primary { background-color: #006633; border: none; }
+    .btn-primary:hover { background-color: #004d26; }
+    .btn-success { background-color: #f9b233; border: none; color: black; }
+    .btn-success:hover { background-color: #e6a500; color: black; }
+    table th { background-color: #006633; color: white; }
+    .logout-btn { position: fixed; top: 10px; right: 10px; z-index: 999; }
   </style>
 </head>
 <body>
-  <img id="bg-logo" src="uinsu.png" alt="Logo UINSU">
 
-  <div class="container-panel">
-    <div class="header-panel">
-      <h1>📋 Panel Dosen - Absensi QR Code</h1>
-      <div class="badge-fst">Fakultas Sains dan Teknologi - Ilmu Komputer</div>
-      <p class="mt-1">Rekayasa Perangkat Lunak (RPL)</p>
-    </div>
+  <h1 class="text-center mb-4">📋 Panel Dosen - Absensi QR Code</h1>
 
-    <div class="card-qr mb-5">
-      <h5 class="mb-3 text-success">🎯 QR Code Hari Ini</h5>
-      <div id="qrcode" class="mb-3 d-flex justify-content-center"></div>
-      <button onclick="generateQRCode()" class="btn btn-primary">🔁 Generate QR</button>
-    </div>
+  <div class="mb-4 text-center">
+    <h5>🎯 QR Code Hari Ini</h5>
+    <div id="qrcode" class="mb-3 d-inline-block"></div><br>
+    <button onclick="generateQRCode()" class="btn btn-primary">🔁 Generate QR</button>
+  </div>
 
-    <h3 class="text-center mb-3">📄 Daftar Mahasiswa Hadir</h3>
-    <div class="table-responsive">
-      <table class="table table-bordered text-center" id="tabel-absen">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>NIM</th>
-            <th>Nama</th>
-            <th>Tanggal</th>
-            <th>Jam</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <h3 class="text-center mb-3">📄 Daftar Mahasiswa Hadir</h3>
+  <div class="table-responsive">
+    <table class="table table-bordered text-center" id="tabel-absen">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>NIM</th>
+          <th>Nama</th>
+          <th>Tanggal</th>
+          <th>Jam</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <div class="text-end mt-3">
-      <button onclick="exportToExcel()" class="btn btn-success">📥 Export ke Excel</button>
-    </div>
-
-    <div class="footer mt-5">
-      <em>&copy; <script>document.write(new Date().getFullYear())</script> Universitas Islam Negeri Sumatera Utara</em>
-    </div>
+  <div class="text-end mt-3">
+    <button onclick="exportToExcel()" class="btn btn-success">📥 Export ke Excel</button>
   </div>
 
   <button class="btn btn-danger logout-btn" onclick="logout()">🚪 Logout</button>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
+    // Konfigurasi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCCJwC685IGikpDCFnc6XPLrodGi4TqkOU",
       authDomain: "absensi-qr-42757.firebaseapp.com",
       databaseURL: "https://absensi-qr-42757-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "absensi-qr-42757",
-      storageBucket: "absensi-qr-42757.firebasestorage.app",
+      storageBucket: "absensi-qr-42757.appspot.com",
       messagingSenderId: "914063064915",
-      appId: "1:914063064915:web:cbfc9f253fe38f1370eba6",
-      measurementId: "G-VCZT04XMHG"
+      appId: "1:914063064915:web:cbfc9f253fe38f1370eba6"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-  </script>
-  <script>
-    const dosen = JSON.parse(localStorage.getItem("dosenLogin"));
-    if (!dosen) {
-      window.location.href = "login.html";
-    }
+    const tanggalHariIni = new Date().toISOString().split("T")[0];
 
     function logout() {
       localStorage.removeItem("dosenLogin");
@@ -197,96 +80,85 @@
     function generateQRCode() {
       const qrContainer = document.getElementById('qrcode');
       qrContainer.innerHTML = '';
-      const qrData = new Date().toISOString().split('T')[0];
+      const qrData = tanggalHariIni;
       new QRCode(qrContainer, {
         text: qrData,
         width: 200,
         height: 200,
         colorDark: '#000000',
-        colorLight: 'transparent',
+        colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
     }
 
-    function loadAbsen() {
-      const tbody = document.querySelector('#tabel-absen tbody');
+    function tampilkanAbsensi() {
+      const ref = database.ref("absensi/" + tanggalHariIni);
+      const tbody = document.querySelector("#tabel-absen tbody");
       tbody.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem('absensi')) || [];
-      data.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.nim || '-'}</td>
-          <td>${item.nama}</td>
-          <td>${item.tanggal}</td>
-          <td>${item.jam || '-'}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="hapusAbsen(${index})">🗑️ Hapus</button></td>
-        `;
-        tbody.appendChild(tr);
+      ref.on("value", snapshot => {
+        const data = snapshot.val();
+        tbody.innerHTML = "";
+        let index = 1;
+        if (data) {
+          Object.entries(data).forEach(([id, item]) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${index++}</td>
+              <td>${item.nim || '-'}</td>
+              <td>${item.nama}</td>
+              <td>${item.tanggal || tanggalHariIni}</td>
+              <td>${item.jam || item.waktu || '-'}</td>
+              <td>
+                <button class="btn btn-sm btn-danger" onclick="hapusFirebaseAbsen('${id}')">🗑️</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6">Belum ada absensi hari ini.</td></tr>`;
+        }
       });
     }
 
-    function hapusAbsen(index) {
-      const data = JSON.parse(localStorage.getItem('absensi')) || [];
-      if (confirm('Yakin ingin menghapus data ini?')) {
-        data.splice(index, 1);
-        localStorage.setItem('absensi', JSON.stringify(data));
-        loadAbsen();
+    function hapusFirebaseAbsen(id) {
+      if (confirm("Yakin ingin menghapus data ini?")) {
+        const ref = database.ref("absensi/" + tanggalHariIni + "/" + id);
+        ref.remove().then(() => {
+          alert("✅ Data berhasil dihapus.");
+        }).catch(err => {
+          alert("❌ Gagal menghapus: " + err.message);
+        });
       }
     }
 
     function exportToExcel() {
-      const data = JSON.parse(localStorage.getItem('absensi')) || [];
-      if (data.length === 0) {
-        alert('Tidak ada data untuk diekspor!');
-        return;
-      }
-      const ws_data = [['NIM', 'Nama', 'Tanggal', 'Jam']];
-      data.forEach(item => {
-        ws_data.push([item.nim || '-', item.nama, item.tanggal, item.jam || '-']);
+      const ref = database.ref("absensi/" + tanggalHariIni);
+      ref.once("value").then(snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          alert("❌ Tidak ada data untuk diekspor!");
+          return;
+        }
+        const ws_data = [["NIM", "Nama", "Tanggal", "Jam"]];
+        Object.values(data).forEach(item => {
+          ws_data.push([
+            item.nim || "-",
+            item.nama,
+            item.tanggal || tanggalHariIni,
+            item.jam || item.waktu || "-"
+          ]);
+        });
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+        XLSX.writeFile(wb, "data_absensi_" + tanggalHariIni + ".xlsx");
       });
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(ws_data);
-      XLSX.utils.book_append_sheet(wb, ws, 'Absensi');
-      XLSX.writeFile(wb, 'data_absensi.xlsx');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       generateQRCode();
       tampilkanAbsensi();
     });
-  </script>
-  <script>
-  const tanggalHariIni = new Date().toISOString().split("T")[0];
-
-  function tampilkanAbsensi() {
-    const ref = database.ref("absensi/" + tanggalHariIni);
-    const tbody = document.querySelector("#tabel-absen tbody");
-    tbody.innerHTML = "";
-
-    ref.on("value", snapshot => {
-      const data = snapshot.val();
-      let index = 1;
-      if (data) {
-        Object.values(data).forEach(item => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${index++}</td>
-            <td>${item.nim || '-'}</td>
-            <td>${item.nama}</td>
-            <td>${item.tanggal || tanggalHariIni}</td>
-            <td>${item.jam || item.waktu || '-'}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="hapusFirebaseAbsen('${item.nim}', '${tanggalHariIni}')">🗑️</button></td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } else {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="4">Belum ada yang absen hari ini.</td>`;
-        tbody.appendChild(tr);
-      }
-    });
-  }
   </script>
 </body>
 </html>
